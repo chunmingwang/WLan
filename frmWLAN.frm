@@ -27,7 +27,7 @@
 	Using My.Sys.Forms
 	
 	Type frmWLANType Extends Form
-		g_scanEvent As .HANDLE= NULL
+		pScanEvent As .HANDLE= NULL
 		hClient As .HANDLE= NULL
 		pIfList As WLAN_INTERFACE_INFO_LIST Ptr
 		pList As WLAN_AVAILABLE_NETWORK_LIST Ptr
@@ -189,7 +189,7 @@ Private Sub frmWLANType.WlanNotificationCallback(pData As L2_NOTIFICATION_DATA P
 			End Select
 			
 		End If
-		SetEvent(.g_scanEvent)
+		SetEvent(.pScanEvent)
 	End With
 End Sub
 
@@ -311,12 +311,12 @@ Private Sub frmWLANType.Form_Create(ByRef Sender As Control)
 		Logmsg("WlanOpenHandle failed, error code: " & ret)
 	Else
 		' 重置事件状态
-		Logmsg("ResetEvent " & ResetEvent(g_scanEvent)) 
+		Logmsg("ResetEvent " & ResetEvent(pScanEvent)) 
 		
 		Logmsg("WLAN API opened (ver " & ver & ")")
 		
-		g_scanEvent = CreateEvent(NULL, False, False, NULL)
-		Logmsg("CreateEvent " & g_scanEvent)
+		pScanEvent = CreateEvent(NULL, False, False, NULL)
+		Logmsg("CreateEvent " & pScanEvent)
 		
 		' 注册通知
 		ret = WlanRegisterNotification(hClient, WLAN_NOTIFICATION_SOURCE_ACM, True, @WlanNotificationCallback, @This, NULL, NULL)
@@ -345,7 +345,7 @@ Private Sub frmWLANType.Form_Create(ByRef Sender As Control)
 End Sub
 
 Private Sub frmWLANType.Form_Destroy(ByRef Sender As Control)
-	If g_scanEvent Then CloseHandle(g_scanEvent)
+	If pScanEvent Then CloseHandle(pScanEvent)
 	If pIfList Then WlanFreeMemory(pIfList)
 	If hClient Then WlanCloseHandle(hClient, NULL)
 End Sub
